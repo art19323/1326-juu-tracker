@@ -67,10 +67,10 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 /* section fully completed -> green */
 .section.all-done .section-header{background:#ecfdf5}
 .section.all-done .section-header:hover{background:#dcfce7}
-.section.all-done .section-label{color:#15803d}
-.section.all-done .section-count{color:#15803d;font-weight:700}
+.section.all-done .section-label{color:#0b5c2e}
+.section.all-done .section-count{color:#0b5c2e;font-weight:700}
 .section.all-done .section-count::after{content:' \2713'}
-.section.all-done .sec-chevron{color:#15803d}
+.section.all-done .sec-chevron{color:#0b5c2e}
 .sec-chevron{color:var(--muted);transition:transform .2s;font-size:12px}
 .section.open .sec-chevron{transform:rotate(180deg)}
 .section-tasks{display:none}
@@ -1366,6 +1366,15 @@ function applyFilterToEl(el, tid) {
 }
 
 // ── stats ─────────────────────────────────────────────────────────────────────
+// The fill gets more saturated the more of the folder is done:
+// 0% = barely-tinted green, 100% = solid green. Lightness is capped so the
+// dark label text stays readable on top.
+function fillColor(pct) {
+  const t = Math.max(0, Math.min(100, pct)) / 100;
+  const sat = 45 + 35 * t;
+  const lig = 93 - 22 * t;
+  return `hsl(142 ${sat.toFixed(0)}% ${lig.toFixed(0)}%)`;
+}
 function updateStats() {
   let total=0, done=0, blocked=0, todo=0;
   document.querySelectorAll('.task').forEach(el => {
@@ -1390,7 +1399,10 @@ function updateStats() {
     if (fill) fill.style.width = pctStage + '%';
     if (pctEl) pctEl.textContent = tasks.length ? `${d}/${tasks.length} · ${pctStage}%` : '';
     const hdrFill = stEl.querySelector('.stage-header .pfill');
-    if (hdrFill) hdrFill.style.width = pctStage + '%';
+    if (hdrFill) {
+      hdrFill.style.width = pctStage + '%';
+      hdrFill.style.background = fillColor(pctStage);
+    }
   });
 }
 function updateSectionCounts() {
@@ -1401,7 +1413,10 @@ function updateSectionCounts() {
     const cntEl = sec.querySelector('.section-count');
     if (cntEl) cntEl.textContent = tasks.length ? `${done}/${tasks.length} · ${pctSec}%` : '0';
     const secFill = sec.querySelector('.section-header .pfill');
-    if (secFill) secFill.style.width = pctSec + '%';
+    if (secFill) {
+      secFill.style.width = pctSec + '%';
+      secFill.style.background = fillColor(pctSec);
+    }
     sec.classList.toggle('all-done', tasks.length > 0 && done === tasks.length);
   });
   applySectionVisibility();
