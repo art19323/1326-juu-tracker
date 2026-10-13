@@ -70,6 +70,9 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .sec-chevron{color:var(--muted);transition:transform .2s;font-size:12px}
 .section.open .sec-chevron{transform:rotate(180deg)}
 .section-tasks{display:none}
+/* section / stage with nothing left under the active filter */
+.sec-hidden{display:none!important}
+.stage-hidden{display:none!important}
 .section.open .section-tasks{display:block}
 
 /* ── task ── */
@@ -1324,6 +1327,25 @@ function reapplyFilters() {
     const tid = el.id.replace('t_','');
     applyFilterToEl(el, tid);
   });
+  applySectionVisibility();
+}
+
+// Hide a section when it has tasks but none of them match the active filter
+// (e.g. a fully completed section while the 'Не начато' filter is on).
+// Sections with no tasks at all stay visible, otherwise new items could not
+// be added while a filter is active.
+function applySectionVisibility() {
+  document.querySelectorAll('.stage').forEach(stEl => {
+    let visible = 0;
+    stEl.querySelectorAll('.section').forEach(sec => {
+      const all = [...sec.querySelectorAll('.task')];
+      const shown = all.filter(t => !t.classList.contains('hidden')).length;
+      const hide = all.length > 0 && shown === 0;
+      sec.classList.toggle('sec-hidden', hide);
+      if (!hide) visible++;
+    });
+    stEl.classList.toggle('stage-hidden', visible === 0);
+  });
 }
 function applyFilterToEl(el, tid) {
   const s = getStatus(tid);
@@ -1365,6 +1387,7 @@ function updateSectionCounts() {
     if (cntEl) cntEl.textContent = tasks.length;
     sec.classList.toggle('all-done', tasks.length > 0 && done === tasks.length);
   });
+  applySectionVisibility();
 }
 
 loadState();
