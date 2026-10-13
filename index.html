@@ -49,6 +49,10 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .mini-fill{height:3px;background:var(--done);border-radius:2px}
 .chevron{color:var(--muted);transition:transform .2s;font-size:15px}
 .stage.open .chevron{transform:rotate(180deg)}
+/* progressive green fill: grows left-to-right with completion */
+.stage-header,.section-header{position:relative}
+.stage-header>*,.section-header>*{position:relative;z-index:1}
+.stage-header>.pfill,.section-header>.pfill{position:absolute;left:0;top:0;bottom:0;width:0;background:#86efac;z-index:0;pointer-events:none;transition:width .4s}
 .stage-body{display:none;border-top:1px solid var(--border)}
 .stage.open .stage-body{display:block}
 
@@ -124,6 +128,7 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
     <div class="progress-bar"><div class="progress-fill" id="main-bar"></div></div>
   </div>
   <div class="stats">
+    <div class="stat">Выполнено <b id="s-pct">0%</b></div>
     <div class="stat">Всего <b id="s-total">0</b></div>
     <div class="stat">✓ <b id="s-done">0</b></div>
     <div class="stat">⏳ <b id="s-blocked">0</b></div>
@@ -1244,6 +1249,7 @@ function render() {
     header.className = 'stage-header';
     const label = isGeneral ? 'Общие вопросы проекта' : stage.title.replace(/^Этап \d+ · /,'');
     header.innerHTML = `
+      <span class="pfill"></span>
       <span class="stage-num">${isGeneral?'★':'Этап '+stage.id}</span>
       <span class="stage-name">${escHtml(label)}</span>
       <span class="stage-meta">
@@ -1263,7 +1269,7 @@ function render() {
 
       const sh = document.createElement('div');
       sh.className = 'section-header';
-      sh.innerHTML = `<span class="section-label">${escHtml(sec.title)}</span>
+      sh.innerHTML = `<span class="pfill"></span><span class="section-label">${escHtml(sec.title)}</span>
         <span class="section-count" id="cnt_${sec.id}"></span>
         <span class="sec-chevron">▾</span>`;
       sh.onclick = () => secEl.classList.toggle('open');
@@ -1374,21 +1380,28 @@ function updateStats() {
   document.getElementById('s-todo').textContent = todo;
   const pct = total ? Math.round(done/total*100) : 0;
   document.getElementById('main-bar').style.width = pct + '%';
+  document.getElementById('s-pct').textContent = pct + '%';
   document.querySelectorAll('.stage').forEach(stEl => {
     const tasks = [...stEl.querySelectorAll('.task')].filter(t => !t.id.endsWith('_'));
     const d = tasks.filter(t => getStatus(t.id.replace('t_','')) === 'done').length;
     const fill = stEl.querySelector('.mini-fill');
     const pctEl = stEl.querySelector('.stage-pct');
-    if (fill) fill.style.width = tasks.length ? (d/tasks.length*100)+'%' : '0%';
-    if (pctEl) pctEl.textContent = tasks.length ? `${d}/${tasks.length}` : '';
+    const pctStage = tasks.length ? Math.round(d/tasks.length*100) : 0;
+    if (fill) fill.style.width = pctStage + '%';
+    if (pctEl) pctEl.textContent = tasks.length ? `${d}/${tasks.length} · ${pctStage}%` : '';
+    const hdrFill = stEl.querySelector('.stage-header .pfill');
+    if (hdrFill) hdrFill.style.width = pctStage + '%';
   });
 }
 function updateSectionCounts() {
   document.querySelectorAll('.section').forEach(sec => {
     const tasks = [...sec.querySelectorAll('.task')];
     const done = tasks.filter(t => getStatus(t.id.replace('t_','')) === 'done').length;
+    const pctSec = tasks.length ? Math.round(done/tasks.length*100) : 0;
     const cntEl = sec.querySelector('.section-count');
-    if (cntEl) cntEl.textContent = tasks.length;
+    if (cntEl) cntEl.textContent = tasks.length ? `${done}/${tasks.length} · ${pctSec}%` : '0';
+    const secFill = sec.querySelector('.section-header .pfill');
+    if (secFill) secFill.style.width = pctSec + '%';
     sec.classList.toggle('all-done', tasks.length > 0 && done === tasks.length);
   });
   applySectionVisibility();
