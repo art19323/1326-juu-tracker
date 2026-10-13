@@ -87,8 +87,8 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .badge-blocked{background:#fef3c7;color:#b45309}
 .badge-todo{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 .task-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;border-left:2px solid var(--border);padding-left:8px}
-.task-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;opacity:0;transition:opacity .15s}
-.task:hover .task-del{opacity:.6}
+.task-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;opacity:.35;transition:opacity .15s}
+.task:hover .task-del{opacity:1}
 .task-del:hover{opacity:1!important;color:#dc2626}
 
 /* ── add-task row ── */
@@ -347,6 +347,12 @@ const STAGES = [
       "id": "05-07"
      }
     ]
+   },
+   {
+    "id": "oq2",
+    "title": "Открытые вопросы · Этап 2",
+    "tasks": [],
+    "is_open_q": true
    }
   ]
  },
@@ -871,6 +877,12 @@ const STAGES = [
       "id": "17-03"
      }
     ]
+   },
+   {
+    "id": "oq5",
+    "title": "Открытые вопросы · Этап 5",
+    "tasks": [],
+    "is_open_q": true
    }
   ]
  },
@@ -1147,11 +1159,17 @@ function addTask(secId) {
 }
 
 function deleteTask(tid, secId) {
-  if (!confirm('Удалить задачу?')) return;
-  // remove from customTasks
-  if (customTasks[secId])
+  if (!confirm('Удалить пункт?')) return;
+  const isCustomTask = !!(customTasks[secId] || []).find(t => t.id === tid);
+  if (isCustomTask) {
     customTasks[secId] = customTasks[secId].filter(t => t.id !== tid);
-  delete state[tid];
+    delete state[tid];
+  } else {
+    // built-in task: hide it and remember the choice in the saved state
+    if (typeof state[tid] === 'string') state[tid] = {status: state[tid]};
+    if (!state[tid]) state[tid] = {};
+    state[tid].deleted = true;
+  }
   const el = document.getElementById('t_' + tid);
   if (el) el.remove();
   markDirty();
@@ -1178,7 +1196,7 @@ function makeTaskEl(tid, text, initStatus, isCustom, note, secId) {
       <div class="task-text">${escHtml(text)}</div>
       <div class="task-actions">
         ${badgeHtml(tid, initStatus)}
-        ${isCustom ? `<button class="task-del" onclick="deleteTask('${tid}','${secId}')" title="Удалить">✕</button>` : ''}
+        <button class="task-del" onclick="deleteTask('${tid}','${secId}')" title="Удалить">✕</button>
       </div>
       ${note ? `<div class="task-note">${escHtml(note)}</div>` : ''}
     </div>`;
@@ -1251,6 +1269,7 @@ function render() {
       // static tasks
       sec.tasks.forEach(t => {
         const tid = t.id;
+        if (state[tid] && state[tid].deleted) return;
         if (!state[tid]) state[tid] = {status: t.status || 'todo'};
         const s = getStatus(tid);
         const el = makeTaskEl(tid, t.text, s, false, t.note, sec.id);
