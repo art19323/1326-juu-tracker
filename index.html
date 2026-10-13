@@ -90,6 +90,8 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .badge-blocked{background:#fef3c7;color:#b45309}
 .badge-todo{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 .task-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;border-left:2px solid var(--border);padding-left:8px}
+.task-img{display:block;max-width:240px;max-height:180px;margin-top:7px;border:1px solid var(--border);border-radius:var(--r2);cursor:zoom-in;background:#fff}
+.task-img:hover{border-color:var(--accent)}
 .task-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;opacity:.35;transition:opacity .15s}
 .task:hover .task-del{opacity:1}
 .task-del:hover{opacity:1!important;color:#dc2626}
@@ -1187,7 +1189,7 @@ function badgeHtml(tid, s) {
   return `<button class="task-badge ${cls}" onclick="openStatusMenu('${tid}',this)">${lbl}</button>`;
 }
 
-function makeTaskEl(tid, text, initStatus, isCustom, note, secId) {
+function makeTaskEl(tid, text, initStatus, isCustom, note, secId, img) {
   const el = document.createElement('div');
   el.className = 'task' + (initStatus === 'done' ? ' done' : '');
   el.id = 't_' + tid;
@@ -1197,6 +1199,7 @@ function makeTaskEl(tid, text, initStatus, isCustom, note, secId) {
       ${initStatus==='done'?'checked':''} onchange="toggleDone('${tid}',this.checked)">
     <div class="task-body">
       <div class="task-text">${escHtml(text)}</div>
+      ${img ? `<a href="${escHtml(img)}" target="_blank" rel="noopener"><img class="task-img" src="${escHtml(img)}" loading="lazy" alt="скриншот"></a>` : ''}
       <div class="task-actions">
         ${badgeHtml(tid, initStatus)}
         <button class="task-del" onclick="deleteTask('${tid}','${secId}')" title="Удалить">✕</button>
@@ -1283,7 +1286,7 @@ function render() {
       (customTasks[sec.id] || []).forEach(ct => {
         if (!state[ct.id]) state[ct.id] = {status: 'todo'};
         const s = getStatus(ct.id);
-        const el = makeTaskEl(ct.id, ct.text, s, true, '', sec.id);
+        const el = makeTaskEl(ct.id, ct.text, s, true, '', sec.id, ct.img);
         el.id = 't_' + ct.id;
         tasksEl.appendChild(el);
       });
