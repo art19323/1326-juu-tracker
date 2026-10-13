@@ -13,85 +13,108 @@
   --r:8px;--r2:4px;
 }
 body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:14px;min-height:100vh}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-header h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
-header h1 span{color:var(--accent)}
-.stats{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap}
-.stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:4px 10px;font-size:12px;color:var(--muted)}
-.stat b{color:var(--text)}
-.progress-bar{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:6px}
-.progress-fill{height:4px;background:var(--done);border-radius:2px;transition:width .4s}
 
-.filters{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:57px;z-index:99}
-.filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
+/* ── header ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-size:17px;font-weight:700}
+header h1 span{color:var(--accent)}
+.stats{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:3px 9px;font-size:12px;color:var(--muted)}
+.stat b{color:var(--text)}
+.progress-bar{width:100%;height:3px;background:var(--border);border-radius:2px;margin-top:5px}
+.progress-fill{height:3px;background:var(--done);border-radius:2px;transition:width .4s}
+
+/* ── filters ── */
+.filters{padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:53px;z-index:99}
+.filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:3px 11px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
 .filter-btn.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
-.search{flex:1;min-width:160px;max-width:300px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:20px;font-size:12px;outline:none}
+.search{flex:1;min-width:140px;max-width:280px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 10px;border-radius:20px;font-size:12px;outline:none}
 .search::placeholder{color:var(--muted)}
 
-main{padding:20px;max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+/* ── layout ── */
+main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 
+/* ── stage ── */
 .stage{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.stage.general .stage-header{background:linear-gradient(90deg,#2d1b4e,var(--surface))}
-.stage-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
+.stage.general .stage-header{background:linear-gradient(90deg,#2d1b4e 0%,var(--surface) 100%)}
+.stage-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
 .stage-header:hover{background:var(--surface2)}
 .stage-num{background:var(--accent2);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0}
 .stage.general .stage-num{background:#7c3aed}
-.stage-name{font-weight:600;font-size:15px;flex:1}
+.stage-name{font-weight:600;font-size:14px;flex:1}
 .stage-meta{display:flex;gap:8px;align-items:center}
-.stage-pct{font-size:12px;color:var(--muted)}
-.mini-bar{width:60px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.stage-pct{font-size:11px;color:var(--muted)}
+.mini-bar{width:52px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .mini-fill{height:3px;background:var(--done);border-radius:2px}
-.chevron{color:var(--muted);transition:transform .2s;font-size:16px}
+.chevron{color:var(--muted);transition:transform .2s;font-size:15px}
 .stage.open .chevron{transform:rotate(180deg)}
-
 .stage-body{display:none;border-top:1px solid var(--border)}
 .stage.open .stage-body{display:block}
 
+/* ── section ── */
 .section{border-bottom:1px solid var(--border)}
 .section:last-child{border-bottom:none}
-.section-header{padding:10px 16px 10px 28px;cursor:pointer;display:flex;align-items:center;gap:8px;background:var(--surface2)}
+.section-header{padding:9px 16px 9px 28px;cursor:pointer;display:flex;align-items:center;gap:8px;background:var(--surface2)}
 .section-header:hover{background:var(--bg)}
-.section-label{font-size:12px;font-weight:600;color:var(--muted);flex:1;text-transform:uppercase;letter-spacing:.4px}
+.section-label{font-size:11px;font-weight:600;color:var(--muted);flex:1;text-transform:uppercase;letter-spacing:.4px}
 .section.open-q .section-label{color:var(--blocked)}
 .section-count{font-size:11px;color:var(--muted)}
-.sec-chevron{color:var(--muted);transition:transform .2s;font-size:13px}
+.sec-chevron{color:var(--muted);transition:transform .2s;font-size:12px}
 .section.open .sec-chevron{transform:rotate(180deg)}
-.section-tasks{display:none;padding:4px 0}
+.section-tasks{display:none}
 .section.open .section-tasks{display:block}
 
+/* ── task ── */
 .task{display:flex;align-items:flex-start;gap:10px;padding:8px 16px 8px 36px;border-bottom:1px solid var(--border);transition:background .1s}
 .task:last-child{border-bottom:none}
 .task:hover{background:var(--surface2)}
-.task.hidden{display:none}
-.task-check{flex-shrink:0;margin-top:1px}
-.task-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--done);cursor:pointer}
+.task.hidden{display:none!important}
+.task-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--done);cursor:pointer;flex-shrink:0;margin-top:2px}
 .task-body{flex:1;min-width:0}
-.task-text{line-height:1.4;word-break:break-word}
+.task-text{line-height:1.45;word-break:break-word}
 .task.done .task-text{text-decoration:line-through;color:var(--muted)}
-.task-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;margin-top:4px;font-weight:500}
+.task-actions{display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.task-badge{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:500;cursor:pointer;border:none}
 .badge-done{background:#14532d;color:#86efac}
 .badge-blocked{background:#451a03;color:#fcd34d}
 .badge-todo{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 .task-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;border-left:2px solid var(--border);padding-left:8px}
+.task-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;opacity:0;transition:opacity .15s}
+.task:hover .task-del{opacity:.6}
+.task-del:hover{opacity:1!important;color:#f87171}
 
-.save-btn{position:fixed;bottom:20px;right:20px;background:var(--accent2);color:#fff;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 4px 16px #0006;z-index:200;display:none;transition:opacity .2s}
+/* ── add-task row ── */
+.add-task-row{display:flex;gap:8px;padding:8px 16px 10px 36px;border-top:1px solid var(--border)}
+.add-task-input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:var(--r2);font-size:13px;outline:none;min-width:0}
+.add-task-input:focus{border-color:var(--accent)}
+.add-task-input::placeholder{color:var(--muted)}
+.add-task-btn{background:var(--accent2);color:#fff;border:none;padding:6px 14px;border-radius:var(--r2);cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+.add-task-btn:hover{opacity:.85}
+
+/* ── status picker popup ── */
+.status-menu{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 8px 24px #0008;z-index:500;min-width:160px;display:none;padding:4px 0}
+.status-menu.show{display:block}
+.status-menu button{display:block;width:100%;background:none;border:none;color:var(--text);padding:8px 14px;text-align:left;cursor:pointer;font-size:13px}
+.status-menu button:hover{background:var(--surface2)}
+
+/* ── save btn ── */
+.save-btn{position:fixed;bottom:20px;right:20px;background:var(--accent2);color:#fff;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 4px 16px #0006;z-index:200;display:none}
 .save-btn:hover{opacity:.85}
 .save-status{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:20px;font-size:12px;z-index:200;display:none}
-
 </style>
 </head>
 <body>
 
 <header>
-  <div>
+  <div style="flex:1;min-width:200px">
     <h1>1326_JUU · <span>Трекер</span></h1>
     <div class="progress-bar"><div class="progress-fill" id="main-bar"></div></div>
   </div>
   <div class="stats">
     <div class="stat">Всего <b id="s-total">0</b></div>
-    <div class="stat">✓ Готово <b id="s-done">0</b></div>
-    <div class="stat">⏳ Ожидают <b id="s-blocked">0</b></div>
-    <div class="stat">○ Не начато <b id="s-todo">0</b></div>
+    <div class="stat">✓ <b id="s-done">0</b></div>
+    <div class="stat">⏳ <b id="s-blocked">0</b></div>
+    <div class="stat">○ <b id="s-todo">0</b></div>
   </div>
 </header>
 
@@ -100,10 +123,17 @@ main{padding:20px;max-width:900px;margin:0 auto;display:flex;flex-direction:colu
   <button class="filter-btn" onclick="setFilter('todo',this)">Не начато</button>
   <button class="filter-btn" onclick="setFilter('blocked',this)">Ожидают</button>
   <button class="filter-btn" onclick="setFilter('done',this)">Готово</button>
-  <input class="search" id="search" placeholder="Поиск по задачам…" oninput="doSearch(this.value)">
+  <input class="search" id="search" placeholder="Поиск…" oninput="doSearch(this.value)">
 </div>
 
 <main id="main"></main>
+
+<!-- status popup -->
+<div class="status-menu" id="status-menu">
+  <button onclick="applyStatus('todo')">○ Не начато</button>
+  <button onclick="applyStatus('blocked')">⏳ Ожидает согласования</button>
+  <button onclick="applyStatus('done')">✓ Готово</button>
+</div>
 
 <button class="save-btn" id="save-btn" onclick="saveToGist()">💾 Сохранить</button>
 <div class="save-status" id="save-status"></div>
@@ -111,6 +141,7 @@ main{padding:20px;max-width:900px;margin:0 auto;display:flex;flex-direction:colu
 <script>
 const GIST_ID = "10d441ffe0889c783495062dab8d8deb";
 const GIST_FILE = "1326-juu-state.json";
+const GH_USER = "art19323";
 const STAGES = [
  {
   "id": 1,
@@ -989,19 +1020,22 @@ const STAGES = [
  }
 ];
 
-let state = {};
+let state = {};       // taskId -> {status, text?, custom?}
+let customTasks = {}; // sectionId -> [{id,text,status}]
 let dirty = false;
 let currentFilter = 'all';
 let currentSearch = '';
+let statusMenuTarget = null;
 
-// Load state from Gist
+// ── persistence ───────────────────────────────────────────────────────────────
 async function loadState() {
   try {
-    const url = `https://gist.githubusercontent.com/art19323/${GIST_ID}/raw/${GIST_FILE}?t=${Date.now()}`;
+    const url = `https://gist.githubusercontent.com/${GH_USER}/${GIST_ID}/raw/${GIST_FILE}?t=${Date.now()}`;
     const r = await fetch(url);
     if (r.ok) {
       const d = await r.json();
       state = d.tasks || {};
+      customTasks = d.custom || {};
     }
   } catch(e) { console.log('load error', e); }
   render();
@@ -1009,31 +1043,30 @@ async function loadState() {
 
 async function saveToGist() {
   const btn = document.getElementById('save-btn');
-  const status = document.getElementById('save-status');
-  btn.textContent = '⏳ Сохраняю…';
-  btn.disabled = true;
+  const statusEl = document.getElementById('save-status');
+  btn.textContent = '⏳ Сохраняю…'; btn.disabled = true;
   try {
-    const token = await getToken();
-    if (!token) { showStatus('Токен не найден'); return; }
-    const payload = { files: { [GIST_FILE]: { content: JSON.stringify({ project:'1326_JUU', tasks: state }, null, 2) } } };
+    const token = getToken();
+    if (!token) { showStatus('Токен не найден — введи его при запросе'); return; }
+    const payload = { files: { [GIST_FILE]: { content: JSON.stringify(
+      { project:'1326_JUU', tasks: state, custom: customTasks }, null, 2) } } };
     const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json',
+                 'Accept': 'application/vnd.github+json' },
       body: JSON.stringify(payload)
     });
     if (r.ok) { dirty = false; btn.style.display = 'none'; showStatus('✓ Сохранено'); }
-    else showStatus('Ошибка сохранения: ' + r.status);
+    else showStatus('Ошибка: ' + r.status);
   } catch(e) { showStatus('Ошибка: ' + e.message); }
-  btn.textContent = '💾 Сохранить';
-  btn.disabled = false;
+  btn.textContent = '💾 Сохранить'; btn.disabled = false;
 }
 
-async function getToken() {
-  // Token stored in localStorage after first entry
+function getToken() {
   let t = localStorage.getItem('gh_token');
   if (t) return t;
-  t = prompt('GitHub token (gist scope):');
-  if (t) localStorage.setItem('gh_token', t);
+  t = prompt('GitHub токен (gist + repo scope):');
+  if (t) localStorage.setItem('gh_token', t.trim());
   return t;
 }
 
@@ -1043,140 +1076,194 @@ function showStatus(msg) {
   setTimeout(() => el.style.display = 'none', 2500);
 }
 
-function setStatus(taskId, status) {
-  state[taskId] = status;
+function markDirty() {
   dirty = true;
   document.getElementById('save-btn').style.display = 'block';
-  updateTaskEl(taskId);
+}
+
+// ── status ────────────────────────────────────────────────────────────────────
+function openStatusMenu(tid, badgeEl) {
+  statusMenuTarget = tid;
+  const menu = document.getElementById('status-menu');
+  const rect = badgeEl.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4 + window.scrollY) + 'px';
+  menu.style.left = rect.left + 'px';
+  menu.classList.add('show');
+  setTimeout(() => document.addEventListener('click', closeMenuOnce), 0);
+}
+function closeMenuOnce(e) {
+  if (!document.getElementById('status-menu').contains(e.target)) {
+    document.getElementById('status-menu').classList.remove('show');
+    document.removeEventListener('click', closeMenuOnce);
+  }
+}
+function applyStatus(s) {
+  document.getElementById('status-menu').classList.remove('show');
+  if (!statusMenuTarget) return;
+  setTaskStatus(statusMenuTarget, s);
+}
+function setTaskStatus(tid, s) {
+  if (!state[tid]) state[tid] = {};
+  if (typeof state[tid] === 'string') state[tid] = {status: state[tid]};
+  state[tid].status = s;
+  markDirty();
+  refreshTask(tid);
+  updateStats();
+}
+function getStatus(tid) {
+  const v = state[tid];
+  if (!v) return 'todo';
+  if (typeof v === 'string') return v;
+  return v.status || 'todo';
+}
+
+// ── add custom task ───────────────────────────────────────────────────────────
+function addTask(secId) {
+  const input = document.getElementById('input_' + secId);
+  const text = input.value.trim();
+  if (!text) return;
+  const id = 'custom_' + secId + '_' + Date.now();
+  if (!customTasks[secId]) customTasks[secId] = [];
+  customTasks[secId].push({id, text});
+  state[id] = {status: 'todo'};
+  input.value = '';
+  markDirty();
+  // append task element
+  const tasksEl = document.getElementById('tasks_' + secId);
+  const addRow = document.getElementById('add_' + secId);
+  tasksEl.insertBefore(makeTaskEl(id, text, 'todo', true), addRow);
+  updateStats();
+  reapplyFilters();
+}
+
+function deleteTask(tid, secId) {
+  if (!confirm('Удалить задачу?')) return;
+  // remove from customTasks
+  if (customTasks[secId])
+    customTasks[secId] = customTasks[secId].filter(t => t.id !== tid);
+  delete state[tid];
+  const el = document.getElementById('t_' + tid);
+  if (el) el.remove();
+  markDirty();
   updateStats();
 }
 
-function updateTaskEl(taskId) {
-  const el = document.getElementById('t_' + taskId);
+// ── render ────────────────────────────────────────────────────────────────────
+function badgeHtml(tid, s) {
+  const cls = s === 'done' ? 'badge-done' : s === 'blocked' ? 'badge-blocked' : 'badge-todo';
+  const lbl = s === 'done' ? '✓ Готово' : s === 'blocked' ? '⏳ Ожидает' : '○ Не начато';
+  return `<button class="task-badge ${cls}" onclick="openStatusMenu('${tid}',this)">${lbl}</button>`;
+}
+
+function makeTaskEl(tid, text, initStatus, isCustom, note, secId) {
+  const el = document.createElement('div');
+  el.className = 'task' + (initStatus === 'done' ? ' done' : '');
+  el.id = 't_' + tid;
+  el.dataset.sec = secId || '';
+  el.innerHTML = `
+    <input type="checkbox" style="width:16px;height:16px;accent-color:var(--done);cursor:pointer;flex-shrink:0;margin-top:3px"
+      ${initStatus==='done'?'checked':''} onchange="toggleDone('${tid}',this.checked)">
+    <div class="task-body">
+      <div class="task-text">${escHtml(text)}</div>
+      <div class="task-actions">
+        ${badgeHtml(tid, initStatus)}
+        ${isCustom ? `<button class="task-del" onclick="deleteTask('${tid}','${secId}')" title="Удалить">✕</button>` : ''}
+      </div>
+      ${note ? `<div class="task-note">${escHtml(note)}</div>` : ''}
+    </div>`;
+  return el;
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function refreshTask(tid) {
+  const el = document.getElementById('t_' + tid);
   if (!el) return;
-  const s = state[taskId] || 'todo';
-  el.className = 'task ' + (s === 'done' ? 'done' : '');
+  const s = getStatus(tid);
+  el.className = 'task' + (s === 'done' ? ' done' : '') + (el.classList.contains('hidden') ? ' hidden' : '');
   const badge = el.querySelector('.task-badge');
   if (badge) {
-    badge.className = 'task-badge badge-' + s;
-    badge.textContent = s === 'done' ? '✓ Готово' : s === 'blocked' ? '⏳ Ожидает' : '○ Не начато';
+    badge.className = 'task-badge ' + (s==='done'?'badge-done':s==='blocked'?'badge-blocked':'badge-todo');
+    badge.textContent = s==='done'?'✓ Готово':s==='blocked'?'⏳ Ожидает':'○ Не начато';
   }
   const cb = el.querySelector('input[type=checkbox]');
   if (cb) cb.checked = s === 'done';
-  applyFilter(el, taskId);
+  applyFilterToEl(el, tid);
 }
 
-function applyFilter(el, taskId) {
-  const s = state[taskId] || 'todo';
-  const text = el.querySelector('.task-text').textContent.toLowerCase();
-  const matchFilter = currentFilter === 'all' || currentFilter === s;
-  const matchSearch = !currentSearch || text.includes(currentSearch);
-  el.classList.toggle('hidden', !matchFilter || !matchSearch);
-}
-
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  reapplyFilters();
-}
-
-function doSearch(q) {
-  currentSearch = q.toLowerCase().trim();
-  reapplyFilters();
-}
-
-function reapplyFilters() {
-  document.querySelectorAll('.task').forEach(el => {
-    const taskId = el.id.replace('t_', '');
-    applyFilter(el, taskId);
-  });
-}
-
-function updateStats() {
-  let total = 0, done = 0, blocked = 0, todo = 0;
-  document.querySelectorAll('.task').forEach(el => {
-    const id = el.id.replace('t_', '');
-    const s = state[id] || 'todo';
-    total++; if (s==='done') done++; else if (s==='blocked') blocked++; else todo++;
-  });
-  document.getElementById('s-total').textContent = total;
-  document.getElementById('s-done').textContent = done;
-  document.getElementById('s-blocked').textContent = blocked;
-  document.getElementById('s-todo').textContent = todo;
-  const pct = total ? Math.round(done/total*100) : 0;
-  document.getElementById('main-bar').style.width = pct + '%';
-  // update stage mini-bars
-  document.querySelectorAll('.stage').forEach(stEl => {
-    const tasks = stEl.querySelectorAll('.task');
-    const d = [...tasks].filter(t => (state[t.id.replace('t_','')] || 'todo') === 'done').length;
-    const fill = stEl.querySelector('.mini-fill');
-    const pctEl = stEl.querySelector('.stage-pct');
-    if (fill) fill.style.width = tasks.length ? (d/tasks.length*100)+'%' : '0%';
-    if (pctEl) pctEl.textContent = tasks.length ? `${d}/${tasks.length}` : '';
-  });
+function toggleDone(tid, checked) {
+  setTaskStatus(tid, checked ? 'done' : 'todo');
 }
 
 function render() {
   const main = document.getElementById('main');
   main.innerHTML = '';
   STAGES.forEach((stage, si) => {
-    const isGeneral = stage.is_general;
+    const isGeneral = !!stage.is_general;
     const stEl = document.createElement('div');
-    stEl.className = 'stage' + (isGeneral ? ' general' : '') + (si === 0 ? ' open' : '');
-    stEl.id = 'stage_' + stage.id;
+    stEl.className = 'stage' + (isGeneral?' general':'') + (si===0?' open':'');
 
     const header = document.createElement('div');
     header.className = 'stage-header';
+    const label = isGeneral ? 'Общие вопросы проекта' : stage.title.replace(/^Этап \d+ · /,'');
     header.innerHTML = `
-      <span class="stage-num">${isGeneral ? '★' : 'Этап ' + stage.id}</span>
-      <span class="stage-name">${isGeneral ? 'Общие вопросы проекта' : stage.title.replace(/^Этап \d+ · /, '')}</span>
+      <span class="stage-num">${isGeneral?'★':'Этап '+stage.id}</span>
+      <span class="stage-name">${escHtml(label)}</span>
       <span class="stage-meta">
         <span class="stage-pct"></span>
         <span class="mini-bar"><span class="mini-fill" style="width:0%"></span></span>
       </span>
       <span class="chevron">▾</span>`;
-    header.onclick = () => { stEl.classList.toggle('open'); };
+    header.onclick = () => stEl.classList.toggle('open');
 
     const body = document.createElement('div');
     body.className = 'stage-body';
 
     stage.sections.forEach(sec => {
-      const isOQ = sec.is_open_q;
+      const isOQ = !!sec.is_open_q;
       const secEl = document.createElement('div');
-      secEl.className = 'section' + (isOQ ? ' open-q' : '');
+      secEl.className = 'section' + (isOQ?' open-q':'');
 
       const sh = document.createElement('div');
       sh.className = 'section-header';
-      sh.innerHTML = `<span class="section-label">${sec.title}</span><span class="section-count">${sec.tasks.length}</span><span class="sec-chevron">▾</span>`;
+      sh.innerHTML = `<span class="section-label">${escHtml(sec.title)}</span>
+        <span class="section-count" id="cnt_${sec.id}"></span>
+        <span class="sec-chevron">▾</span>`;
       sh.onclick = () => secEl.classList.toggle('open');
 
       const tasksEl = document.createElement('div');
       tasksEl.className = 'section-tasks';
+      tasksEl.id = 'tasks_' + sec.id;
 
+      // static tasks
       sec.tasks.forEach(t => {
         const tid = t.id;
-        const initStatus = state[tid] || t.status || 'todo';
-        if (!state[tid]) state[tid] = initStatus;
-
-        const tEl = document.createElement('div');
-        tEl.className = 'task' + (initStatus === 'done' ? ' done' : '');
-        tEl.id = 't_' + tid;
-
-        const badge = initStatus === 'done' ? '<span class="task-badge badge-done">✓ Готово</span>'
-          : initStatus === 'blocked' ? '<span class="task-badge badge-blocked">⏳ Ожидает</span>'
-          : '<span class="task-badge badge-todo">○ Не начато</span>';
-
-        const note = t.note ? `<div class="task-note">${t.note}</div>` : '';
-
-        tEl.innerHTML = `
-          <div class="task-check"><input type="checkbox" ${initStatus==='done'?'checked':''} onchange="toggleDone('${tid}',this.checked)"></div>
-          <div class="task-body">
-            <div class="task-text">${t.text}</div>
-            ${badge}${note}
-          </div>`;
-        tasksEl.appendChild(tEl);
+        if (!state[tid]) state[tid] = {status: t.status || 'todo'};
+        const s = getStatus(tid);
+        const el = makeTaskEl(tid, t.text, s, false, t.note, sec.id);
+        tasksEl.appendChild(el);
       });
+
+      // custom tasks for this section
+      (customTasks[sec.id] || []).forEach(ct => {
+        if (!state[ct.id]) state[ct.id] = {status: 'todo'};
+        const s = getStatus(ct.id);
+        const el = makeTaskEl(ct.id, ct.text, s, true, '', sec.id);
+        el.id = 't_' + ct.id;
+        tasksEl.appendChild(el);
+      });
+
+      // add-task row
+      const addRow = document.createElement('div');
+      addRow.className = 'add-task-row';
+      addRow.id = 'add_' + sec.id;
+      addRow.innerHTML = `
+        <input class="add-task-input" id="input_${sec.id}" placeholder="+ Добавить задачу…"
+          onkeydown="if(event.key==='Enter')addTask('${sec.id}')">
+        <button class="add-task-btn" onclick="addTask('${sec.id}')">Добавить</button>`;
+      tasksEl.appendChild(addRow);
 
       secEl.appendChild(sh);
       secEl.appendChild(tasksEl);
@@ -1188,10 +1275,64 @@ function render() {
     main.appendChild(stEl);
   });
   updateStats();
+  updateSectionCounts();
 }
 
-function toggleDone(tid, checked) {
-  setStatus(tid, checked ? 'done' : 'todo');
+// ── filters ───────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  reapplyFilters();
+}
+function doSearch(q) {
+  currentSearch = q.toLowerCase().trim();
+  reapplyFilters();
+}
+function reapplyFilters() {
+  document.querySelectorAll('.task').forEach(el => {
+    const tid = el.id.replace('t_','');
+    applyFilterToEl(el, tid);
+  });
+}
+function applyFilterToEl(el, tid) {
+  const s = getStatus(tid);
+  const text = (el.querySelector('.task-text')||{}).textContent || '';
+  const matchF = currentFilter==='all' || currentFilter===s;
+  const matchS = !currentSearch || text.toLowerCase().includes(currentSearch);
+  el.classList.toggle('hidden', !matchF || !matchS);
+}
+
+// ── stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  let total=0, done=0, blocked=0, todo=0;
+  document.querySelectorAll('.task').forEach(el => {
+    const tid = el.id.replace('t_','');
+    if (tid === '' || el.classList.contains('add-task-row')) return;
+    const s = getStatus(tid);
+    total++; if(s==='done')done++; else if(s==='blocked')blocked++; else todo++;
+  });
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-blocked').textContent = blocked;
+  document.getElementById('s-todo').textContent = todo;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('main-bar').style.width = pct + '%';
+  document.querySelectorAll('.stage').forEach(stEl => {
+    const tasks = [...stEl.querySelectorAll('.task')].filter(t => !t.id.endsWith('_'));
+    const d = tasks.filter(t => getStatus(t.id.replace('t_','')) === 'done').length;
+    const fill = stEl.querySelector('.mini-fill');
+    const pctEl = stEl.querySelector('.stage-pct');
+    if (fill) fill.style.width = tasks.length ? (d/tasks.length*100)+'%' : '0%';
+    if (pctEl) pctEl.textContent = tasks.length ? `${d}/${tasks.length}` : '';
+  });
+}
+function updateSectionCounts() {
+  document.querySelectorAll('.section').forEach(sec => {
+    const tasks = [...sec.querySelectorAll('.task')];
+    const cntEl = sec.querySelector('.section-count');
+    if (cntEl) cntEl.textContent = tasks.length;
+  });
 }
 
 loadState();
