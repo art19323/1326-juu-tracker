@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>1326_JUU · Трекер</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f11;--surface:#18181b;--surface2:#232327;--border:#2e2e35;
+  --text:#e4e4e7;--muted:#71717a;--accent:#818cf8;--accent2:#6366f1;
+  --done:#22c55e;--blocked:#f59e0b;--todo:#52525b;
+  --r:8px;--r2:4px;
+}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:14px;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+header h1 span{color:var(--accent)}
+.stats{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap}
+.stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:4px 10px;font-size:12px;color:var(--muted)}
+.stat b{color:var(--text)}
+.progress-bar{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:6px}
+.progress-fill{height:4px;background:var(--done);border-radius:2px;transition:width .4s}
+
+.filters{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:57px;z-index:99}
+.filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
+.filter-btn.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.search{flex:1;min-width:160px;max-width:300px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:20px;font-size:12px;outline:none}
+.search::placeholder{color:var(--muted)}
+
+main{padding:20px;max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+.stage{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.stage.general .stage-header{background:linear-gradient(90deg,#2d1b4e,var(--surface))}
+.stage-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
+.stage-header:hover{background:var(--surface2)}
+.stage-num{background:var(--accent2);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0}
+.stage.general .stage-num{background:#7c3aed}
+.stage-name{font-weight:600;font-size:15px;flex:1}
+.stage-meta{display:flex;gap:8px;align-items:center}
+.stage-pct{font-size:12px;color:var(--muted)}
+.mini-bar{width:60px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.mini-fill{height:3px;background:var(--done);border-radius:2px}
+.chevron{color:var(--muted);transition:transform .2s;font-size:16px}
+.stage.open .chevron{transform:rotate(180deg)}
+
+.stage-body{display:none;border-top:1px solid var(--border)}
+.stage.open .stage-body{display:block}
+
+.section{border-bottom:1px solid var(--border)}
+.section:last-child{border-bottom:none}
+.section-header{padding:10px 16px 10px 28px;cursor:pointer;display:flex;align-items:center;gap:8px;background:var(--surface2)}
+.section-header:hover{background:var(--bg)}
+.section-label{font-size:12px;font-weight:600;color:var(--muted);flex:1;text-transform:uppercase;letter-spacing:.4px}
+.section.open-q .section-label{color:var(--blocked)}
+.section-count{font-size:11px;color:var(--muted)}
+.sec-chevron{color:var(--muted);transition:transform .2s;font-size:13px}
+.section.open .sec-chevron{transform:rotate(180deg)}
+.section-tasks{display:none;padding:4px 0}
+.section.open .section-tasks{display:block}
+
+.task{display:flex;align-items:flex-start;gap:10px;padding:8px 16px 8px 36px;border-bottom:1px solid var(--border);transition:background .1s}
+.task:last-child{border-bottom:none}
+.task:hover{background:var(--surface2)}
+.task.hidden{display:none}
+.task-check{flex-shrink:0;margin-top:1px}
+.task-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--done);cursor:pointer}
+.task-body{flex:1;min-width:0}
+.task-text{line-height:1.4;word-break:break-word}
+.task.done .task-text{text-decoration:line-through;color:var(--muted)}
+.task-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;margin-top:4px;font-weight:500}
+.badge-done{background:#14532d;color:#86efac}
+.badge-blocked{background:#451a03;color:#fcd34d}
+.badge-todo{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.task-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;border-left:2px solid var(--border);padding-left:8px}
+
+.save-btn{position:fixed;bottom:20px;right:20px;background:var(--accent2);color:#fff;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 4px 16px #0006;z-index:200;display:none;transition:opacity .2s}
+.save-btn:hover{opacity:.85}
+.save-status{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:20px;font-size:12px;z-index:200;display:none}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>1326_JUU · <span>Трекер</span></h1>
+    <div class="progress-bar"><div class="progress-fill" id="main-bar"></div></div>
+  </div>
+  <div class="stats">
+    <div class="stat">Всего <b id="s-total">0</b></div>
+    <div class="stat">✓ Готово <b id="s-done">0</b></div>
+    <div class="stat">⏳ Ожидают <b id="s-blocked">0</b></div>
+    <div class="stat">○ Не начато <b id="s-todo">0</b></div>
+  </div>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all',this)">Все</button>
+  <button class="filter-btn" onclick="setFilter('todo',this)">Не начато</button>
+  <button class="filter-btn" onclick="setFilter('blocked',this)">Ожидают</button>
+  <button class="filter-btn" onclick="setFilter('done',this)">Готово</button>
+  <input class="search" id="search" placeholder="Поиск по задачам…" oninput="doSearch(this.value)">
+</div>
+
+<main id="main"></main>
+
+<button class="save-btn" id="save-btn" onclick="saveToGist()">💾 Сохранить</button>
+<div class="save-status" id="save-status"></div>
+
+<script>
+const GIST_ID = "10d441ffe0889c783495062dab8d8deb";
+const GIST_FILE = "1326-juu-state.json";
+const STAGES = [
+ {
+  "id": 1,
+  "title": "Этап 1 · Обмеры — изучение ТЗ",
+  "sections": [
+   {
+    "id": "01",
+    "title": "01 · Шаблон и ведомость листов",
+    "tasks": [
+     {
+      "text": "Основной шаблон с основными надписями проекта выполнен.",
+      "status": "done",
+      "note": "",
+      "id": "01-01"
+     },
+     {
+      "text": "Подровнять первый лист ведомости: таблицу, отступы, выравнивание, оформление рамки и штампа.",
+      "status": "todo",
+      "note": "",
+      "id": "01-02"
+     },
+     {
+      "text": "Уточнить обозначение первого листа: в диктовке прозвучало «ведомости 100».",
+      "status": "wait",
+      "note": "Не назначать номер листа до подтверждения.",
+      "id": "01-03"
+     },
+     {
+      "text": "После завершения всего комплекта обновить ведомость листов: названия, номера, ссылки.",
+      "status": "todo",
+      "note": "",
+      "id": "01-04"
+     }
+    ]
+   },
+   {
+    "id": "02",
+    "title": "02 · Обмерный план",
+    "tasks": [
+     {
+      "text": "Обмерный план выполнен полностью.",
+      "status": "done",
+      "note": "",
+      "id": "02-01"
+     },
+     {
+      "text": "Сверить обмерный план с фактическими размерами помещений и привязками до выпуска комплекта.",
+      "status": "todo",
+      "note": "",
+      "id": "02-02"
+     }
+    ]
+   },
+   {
+    "id": "03",
+    "title": "03 · План демонтажа",
+    "tasks": [
+     {
+      "text": "План демонтажа выполнен полностью.",
+      "status": "done",
+      "note": "",
+      "id": "03-01"
+     },
+     {
+      "text": "Согласовать план демонтажа с планом монтажа: новые конструкции, заделанные проемы, измененные коммуникации.",
+      "status": "todo",
+      "note": "",
+      "id": "03-02"
+     }
+    ]
+   },
+   {
+    "id": "oq1",
+    "title": "Открытые вопросы · Этап 1",
+    "tasks": [
+     {
+      "text": "Уточнить неясные фрагменты диктовки: обозначение первого листа, дополнительные сантехнические выводы, панель с радиатором, подрезки и мебель ванной.",
+      "status": "wait",
+      "note": "",
+      "id": "19-08"
+     }
+    ],
+    "is_open_q": true
+   }
+  ]
+ },
+ {
+  "id": 2,
+  "title": "Этап 2 · Планировка",
+  "sections": [
+   {
+    "id": "04",
+    "title": "04 · План монтажа и конструктивные узлы",
+    "tasks": [
+     {
+      "text": "Основной план монтажа выполнен.",
+      "status": "done",
+      "note": "",
+      "id": "04-01"
+     },
+     {
+      "text": "Разработать схему гипсокартоновой конструкции над кухней: габариты, высотные отметки, каркас и разрезы.",
+      "status": "todo",
+      "note": "",
+      "id": "04-02"
+     },
+     {
+      "text": "Показать усиленное монтажное основание и монтажное отверстие под встроенную вытяжку Falmec Grupa Silnikowa Plus 50 белый 800 м³/ч.",
+      "status": "todo",
+      "note": "Размер выреза, толщину основания, крепление и массу прибора сверить с инструкцией поставляемой модели. Крепление только к листу ГКЛ не допускается.",
+      "id": "04-03"
+     },
+     {
+      "text": "Показать воздуховод внутри короба: диаметр, трассу, повороты, крепления и точку подключения.",
+      "status": "todo",
+      "note": "Допустимость подключения моторной вытяжки к вентиляционной системе здания подтвердить отдельно по документации дома.",
+      "id": "04-04"
+     },
+     {
+      "text": "Предусмотреть доступ к розетке вытяжки и разъемному соединению воздуховода; обеспечить демонтаж вытяжки вниз без повреждения отделки.",
+      "status": "todo",
+      "note": "",
+      "id": "04-05"
+     },
+     {
+      "text": "Показать скрытый профиль подсветки в нижней плоскости кухонного короба, питание и доступный для обслуживания блок питания.",
+      "status": "todo",
+      "note": "",
+      "id": "04-06"
+     },
+     {
+      "text": "Разработать узел экрана ванны с утопленной нишей под подсветку высотой 80 мм от чистого пола.",
+      "status": "todo",
+      "note": "",
+      "id": "04-07"
+     },
+     {
+      "text": "В узле ванны показать каркас, глубину ниши, профиль подсветки, гидроизоляцию, облицовку и сервисный доступ.",
+      "status": "todo",
+      "note": "Ванну установить на штатные опоры производителя; экран не должен воспринимать ее вес.",
+      "id": "04-08"
+     },
+     {
+      "text": "Согласовать конструктивные узлы с планами мебели, сантехники, электрики, освещения и с развертками.",
+      "status": "todo",
+      "note": "",
+      "id": "04-09"
+     }
+    ]
+   },
+   {
+    "id": "05",
+    "title": "05 · План расстановки мебели с размерами",
+    "tasks": [
+     {
+      "text": "Базовая схема расстановки мебели подготовлена.",
+      "status": "done",
+      "note": "",
+      "id": "05-01"
+     },
+     {
+      "text": "Проставить полный комплект размеров и привязок мебели.",
+      "status": "todo",
+      "note": "Окончательные размеры давать только после разработки всех разверток и листов заказной мебели.",
+      "id": "05-02"
+     },
+     {
+      "text": "Проверить габариты мебели, проходы и возможность открывания фасадов после разработки всех позиций.",
+      "status": "todo",
+      "note": "",
+      "id": "05-03"
+     },
+     {
+      "text": "Отобразить напольные покрытия и согласовать их границы с планом полов.",
+      "status": "todo",
+      "note": "",
+      "id": "05-04"
+     },
+     {
+      "text": "Сделать выноски на каждую заказную позицию мебели с маркой и ссылкой на соответствующий лист.",
+      "status": "todo",
+      "note": "",
+      "id": "05-05"
+     },
+     {
+      "text": "Указать расположение жалюзи и штор; уточнить типы, монтажные зоны и материалы.",
+      "status": "todo",
+      "note": "",
+      "id": "05-06"
+     },
+     {
+      "text": "Отобразить оконные проемы и указать их размеры.",
+      "status": "todo",
+      "note": "",
+      "id": "05-07"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": 3,
+  "title": "Этап 3 · Электрика — чертежи",
+  "sections": [
+   {
+    "id": "07",
+    "title": "07 · Сводный план электрики",
+    "tasks": [
+     {
+      "text": "План всех розеток, выключателей и электровыводов выполнен.",
+      "status": "done",
+      "note": "",
+      "id": "07-01"
+     },
+     {
+      "text": "Проверить рабочий чат и внести все еще неучтенные комментарии по электрике.",
+      "status": "todo",
+      "note": "",
+      "id": "07-02"
+     },
+     {
+      "text": "Проверить расположение розеток, выключателей и бра на развертке спальни после разработки молдингов.",
+      "status": "todo",
+      "note": "",
+      "id": "07-03"
+     },
+     {
+      "text": "При необходимости сдвинуть группы электрики и бра, согласовав общие оси с учетом молдингов.",
+      "status": "todo",
+      "note": "",
+      "id": "07-04"
+     },
+     {
+      "text": "Проверить питание электрического полотенцесушителя, подсветки ванны и подсветки кухонного короба.",
+      "status": "todo",
+      "note": "",
+      "id": "07-05"
+     },
+     {
+      "text": "Сверить актуальную модель индукционной варочной панели с рабочим чатом и общей ведомостью.",
+      "status": "wait",
+      "note": "Уточнить, была ли замена модели; после подтверждения проверить требования к подключению и монтажу.",
+      "id": "07-06"
+     },
+     {
+      "text": "Сверить электровыводы и расчетные нагрузки с техническими картами выбранного оборудования.",
+      "status": "todo",
+      "note": "",
+      "id": "07-07"
+     }
+    ]
+   },
+   {
+    "id": "08",
+    "title": "08 · Схема групп освещения",
+    "tasks": [
+     {
+      "text": "Схема групп освещения выполнена: показана связь выключателей и клавиш с конкретными светильниками.",
+      "status": "done",
+      "note": "",
+      "id": "08-01"
+     },
+     {
+      "text": "После всех корректировок проверить группы включения, маркировку и типы выключателей.",
+      "status": "todo",
+      "note": "",
+      "id": "08-02"
+     }
+    ]
+   },
+   {
+    "id": "09",
+    "title": "09 · План элементов освещения",
+    "tasks": [
+     {
+      "text": "План элементов освещения выполнен: типы светильников, количество и привязки указаны.",
+      "status": "done",
+      "note": "",
+      "id": "09-01"
+     },
+     {
+      "text": "Согласовать светильники и подсветки с планом потолков, мебелью и итоговыми развертками.",
+      "status": "todo",
+      "note": "",
+      "id": "09-02"
+     }
+    ]
+   },
+   {
+    "id": "oq3",
+    "title": "Открытые вопросы · Этап 3",
+    "tasks": [
+     {
+      "text": "Подтвердить актуальную модель индукционной варочной панели по чату и общей ведомости.",
+      "status": "wait",
+      "note": "",
+      "id": "19-04"
+     }
+    ],
+    "is_open_q": true
+   }
+  ]
+ },
+ {
+  "id": 4,
+  "title": "Этап 4 · Рабочие чертежи",
+  "sections": [
+   {
+    "id": "06",
+    "title": "06 · План сантехники и отопления",
+    "tasks": [
+     {
+      "text": "Указать цвета и исполнения всех сантехнических приборов.",
+      "status": "todo",
+      "note": "",
+      "id": "06-01"
+     },
+     {
+      "text": "Отметить новые радиаторы: модели, размеры и места установки.",
+      "status": "wait",
+      "note": "Финальные позиции и расположение радиаторов согласовать с дизайнером. Не принимать прежние высоты установки автоматически.",
+      "id": "06-02"
+     },
+     {
+      "text": "Показать выводы канализации, горячей и холодной воды с привязками на плане.",
+      "status": "todo",
+      "note": "",
+      "id": "06-03"
+     },
+     {
+      "text": "Проставить высотные отметки всех сантехнических выводов от уровня чистого пола.",
+      "status": "todo",
+      "note": "",
+      "id": "06-04"
+     },
+     {
+      "text": "Показать посудомоечную машину и кухонную мойку; проверить перенос коммуникаций относительно корпуса мебели.",
+      "status": "todo",
+      "note": "",
+      "id": "06-05"
+     },
+     {
+      "text": "Показать стиральную и сушильную машины; проверить подключения, включая необходимость отвода конденсата сушильной машины.",
+      "status": "todo",
+      "note": "",
+      "id": "06-06"
+     },
+     {
+      "text": "Уточнить, нужны ли дополнительные сантехнические выводы или приборы.",
+      "status": "wait",
+      "note": "Соответствующая фраза в диктовке не завершена — требуется конкретизация.",
+      "id": "06-07"
+     },
+     {
+      "text": "Отметить замену существующего полотенцесушителя на электрический и согласовать питание с планом электрики.",
+      "status": "todo",
+      "note": "",
+      "id": "06-08"
+     },
+     {
+      "text": "Согласовать изменение водяного подключения полотенцесушителя с сохранением работоспособности системы.",
+      "status": "wait",
+      "note": "Определить тип системы: ГВС или отопление. Транзитный участок, байпас и демонтаж согласовать с инженером и администрацией. Простое сохранение трубы не считать готовым решением.",
+      "id": "06-09"
+     }
+    ]
+   },
+   {
+    "id": "10",
+    "title": "10 · План потолков",
+    "tasks": [
+     {
+      "text": "Показать типы материалов и конструкций потолков и границы участков.",
+      "status": "todo",
+      "note": "",
+      "id": "10-01"
+     },
+     {
+      "text": "Указать площадь каждого типа потолочной отделки.",
+      "status": "todo",
+      "note": "",
+      "id": "10-02"
+     },
+     {
+      "text": "Проставить необходимые размеры и высотные отметки.",
+      "status": "todo",
+      "note": "",
+      "id": "10-03"
+     },
+     {
+      "text": "Отметить потолочные светильники и согласовать их с планом элементов освещения.",
+      "status": "todo",
+      "note": "",
+      "id": "10-04"
+     },
+     {
+      "text": "Увязать потолки с кухонным коробом и трассами кондиционирования.",
+      "status": "todo",
+      "note": "",
+      "id": "10-05"
+     }
+    ]
+   },
+   {
+    "id": "11",
+    "title": "11 · План полов и плинтусов",
+    "tasks": [
+     {
+      "text": "Отобразить напольные покрытия штриховками и присвоить марки отделочным материалам.",
+      "status": "todo",
+      "note": "",
+      "id": "11-01"
+     },
+     {
+      "text": "Показать границы корпусной мебели на плане полов.",
+      "status": "todo",
+      "note": "",
+      "id": "11-02"
+     },
+     {
+      "text": "Составить ведомость покрытий: марка, штриховка, описание и площадь.",
+      "status": "todo",
+      "note": "",
+      "id": "11-03"
+     },
+     {
+      "text": "Указать виды плинтусов и количество погонных метров по каждому типу.",
+      "status": "todo",
+      "note": "",
+      "id": "11-04"
+     },
+     {
+      "text": "Показать раскладку плитки, направление и точку начала укладки.",
+      "status": "todo",
+      "note": "",
+      "id": "11-05"
+     },
+     {
+      "text": "При необходимости показать подрезки, их размеры и дополнительные деталировки.",
+      "status": "wait",
+      "note": "Фрагмент диктовки о подрезках и дополнительном уточнении неясен. Не добавлять неподтвержденные требования.",
+      "id": "11-06"
+     },
+     {
+      "text": "Под шкафом прихожей предусмотреть плитку вместо паркета; согласовать границу с фактическими габаритами шкафа.",
+      "status": "todo",
+      "note": "",
+      "id": "11-07"
+     },
+     {
+      "text": "Под кухней предусмотреть обычную недорогую плитку полосой ориентировочно 500–520 мм от стены.",
+      "status": "todo",
+      "note": "Проверить положение опор и цоколя: кухня должна опираться на плитку, а переход покрытия не должен оказаться на виду.",
+      "id": "11-08"
+     },
+     {
+      "text": "Проверить уровни, толщины смежных покрытий и узлы переходов между ними.",
+      "status": "todo",
+      "note": "",
+      "id": "11-09"
+     }
+    ]
+   },
+   {
+    "id": "12",
+    "title": "12 · План отделки стен",
+    "tasks": [
+     {
+      "text": "Обозначить каждый тип отделки стен буквенной маркой.",
+      "status": "todo",
+      "note": "",
+      "id": "12-01"
+     },
+     {
+      "text": "Указать на стенах типы отделки, цвета или коды и необходимые подписи.",
+      "status": "todo",
+      "note": "",
+      "id": "12-02"
+     },
+     {
+      "text": "Показать расположение разверток, направления взгляда и ссылки на листы.",
+      "status": "todo",
+      "note": "",
+      "id": "12-03"
+     },
+     {
+      "text": "Составить ведомость отделки стен с подсчетом площадей.",
+      "status": "todo",
+      "note": "",
+      "id": "12-04"
+     },
+     {
+      "text": "Для сложных элементов при необходимости выполнить дополнительные виды, разрезы и 3D-визуализации.",
+      "status": "todo",
+      "note": "",
+      "id": "12-05"
+     },
+     {
+      "text": "В детской над дверью показать декоративный узор, выполненный покраской, а не молдингом.",
+      "status": "todo",
+      "note": "",
+      "id": "12-06"
+     }
+    ]
+   },
+   {
+    "id": "oq4",
+    "title": "Открытые вопросы · Этап 4",
+    "tasks": [
+     {
+      "text": "Подтвердить окончательные модели, размеры и расположение радиаторов.",
+      "status": "wait",
+      "note": "",
+      "id": "19-01"
+     },
+     {
+      "text": "Проверить ведомость отделочных материалов; запросить недостающие позиции, цвета и артикулы.",
+      "status": "wait",
+      "note": "",
+      "id": "19-02"
+     },
+     {
+      "text": "Уточнить расположение наружного блока кондиционера и трассы к внутренним блокам.",
+      "status": "wait",
+      "note": "",
+      "id": "19-05"
+     },
+     {
+      "text": "Уточнить способ отвода конденсата кондиционера и необходимость подключения к канализации.",
+      "status": "wait",
+      "note": "При подключении к канализации разработать узел с защитой от запахов по решению инженера.",
+      "id": "19-06"
+     },
+     {
+      "text": "Согласовать замену водяного полотенцесушителя на электрический без нарушения общей системы.",
+      "status": "wait",
+      "note": "",
+      "id": "19-07"
+     }
+    ],
+    "is_open_q": true
+   }
+  ]
+ },
+ {
+  "id": 5,
+  "title": "Этап 5 · Развёртки по помещениям",
+  "sections": [
+   {
+    "id": "13",
+    "title": "13 · Развертки: общие требования",
+    "tasks": [
+     {
+      "text": "Указать номер каждой развертки и согласовать ссылки с планом отделки стен.",
+      "status": "todo",
+      "note": "",
+      "id": "13-01"
+     },
+     {
+      "text": "Проставить все высоты, размеры и привязки электрики и сантехники.",
+      "status": "todo",
+      "note": "",
+      "id": "13-02"
+     },
+     {
+      "text": "Перенести на развертки все элементы соответствующих планов и проверить их взаимное расположение.",
+      "status": "todo",
+      "note": "",
+      "id": "13-03"
+     },
+     {
+      "text": "Отобразить используемые материалы буквенными марками.",
+      "status": "todo",
+      "note": "",
+      "id": "13-04"
+     },
+     {
+      "text": "Для каждого помещения составить таблицу материалов: марка и описание.",
+      "status": "todo",
+      "note": "",
+      "id": "13-05"
+     },
+     {
+      "text": "На участках с плиткой показать раскладку и необходимые подрезки.",
+      "status": "todo",
+      "note": "",
+      "id": "13-06"
+     },
+     {
+      "text": "На 3D-видах применять те же буквенные марки материалов, что на развертках и в ведомостях.",
+      "status": "todo",
+      "note": "",
+      "id": "13-07"
+     }
+    ]
+   },
+   {
+    "id": "14",
+    "title": "14 · Развертки: прихожая, кухня, гостиная",
+    "tasks": [
+     {
+      "text": "Выполнить первый лист разверток прихожей, кухни и гостиной.",
+      "status": "todo",
+      "note": "",
+      "id": "14-01"
+     },
+     {
+      "text": "Выполнить второй лист разверток прихожей, кухни и гостиной.",
+      "status": "todo",
+      "note": "",
+      "id": "14-02"
+     },
+     {
+      "text": "Увязать шкаф прихожей, кухню, остров, ТВ-панель и тумбу ТВ с листами заказной мебели.",
+      "status": "todo",
+      "note": "",
+      "id": "14-03"
+     },
+     {
+      "text": "Уточнить вопрос о панели, переносе радиатора и дополнительном элементе.",
+      "status": "wait",
+      "note": "В диктовке фраза «панель затылка ... дополнительный пол» неясна. Уточнить, какая панель, будет ли там радиатор, куда он переносится и что за дополнительный элемент имеется в виду.",
+      "id": "14-04"
+     }
+    ]
+   },
+   {
+    "id": "15",
+    "title": "15 · Развертки: ванная",
+    "tasks": [
+     {
+      "text": "Выполнить развертки ванной с привязками сантехники, электрики и мебели.",
+      "status": "todo",
+      "note": "",
+      "id": "15-01"
+     },
+     {
+      "text": "Выполнить 3D-виды и необходимые разрезы ванной, показывающие конструкцию и материалы.",
+      "status": "todo",
+      "note": "",
+      "id": "15-02"
+     },
+     {
+      "text": "На 3D-видах обозначить материалы теми же буквенными марками, что на развертках и в ведомости.",
+      "status": "todo",
+      "note": "",
+      "id": "15-03"
+     },
+     {
+      "text": "Проверить экран ванны с нишей 80 мм, инсталляцию, открывание шкафов и электрический полотенцесушитель.",
+      "status": "todo",
+      "note": "",
+      "id": "15-04"
+     }
+    ]
+   },
+   {
+    "id": "16",
+    "title": "16 · Развертки: спальня",
+    "tasks": [
+     {
+      "text": "Выполнить развертки спальни.",
+      "status": "todo",
+      "note": "",
+      "id": "16-01"
+     },
+     {
+      "text": "Разработать расположение молдингов.",
+      "status": "todo",
+      "note": "",
+      "id": "16-02"
+     },
+     {
+      "text": "Проверить розетки, выключатели и бра относительно молдингов; при необходимости сместить.",
+      "status": "todo",
+      "note": "",
+      "id": "16-03"
+     },
+     {
+      "text": "Согласовать общие оси групп розеток, выключателей и бра.",
+      "status": "todo",
+      "note": "",
+      "id": "16-04"
+     },
+     {
+      "text": "Перенести согласованные изменения обратно на планы электрики и освещения.",
+      "status": "todo",
+      "note": "",
+      "id": "16-05"
+     },
+     {
+      "text": "Увязать шкаф спальни с листом заказной мебели.",
+      "status": "todo",
+      "note": "",
+      "id": "16-06"
+     }
+    ]
+   },
+   {
+    "id": "17",
+    "title": "17 · Развертки: детская",
+    "tasks": [
+     {
+      "text": "Выполнить развертки детской.",
+      "status": "todo",
+      "note": "",
+      "id": "17-01"
+     },
+     {
+      "text": "Показать над дверью декоративный узор, выполненный покраской, без молдингов.",
+      "status": "todo",
+      "note": "",
+      "id": "17-02"
+     },
+     {
+      "text": "Увязать шкаф детской с листом заказной мебели.",
+      "status": "todo",
+      "note": "",
+      "id": "17-03"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": 6,
+  "title": "Этап 6 · Заказные позиции мебели — схемы",
+  "sections": [
+   {
+    "id": "18",
+    "title": "18 · Заказные позиции мебели",
+    "tasks": [
+     {
+      "text": "М-01 · Шкаф прихожей, переходящий в кухонный шкаф: разработать габариты, виды, наполнение и разрезы.",
+      "status": "todo",
+      "note": "",
+      "id": "18-01"
+     },
+     {
+      "text": "М-02 · Кухня со столешницей: разработать габариты, секции, наполнение, встроенную технику и монтажные требования.",
+      "status": "todo",
+      "note": "",
+      "id": "18-02"
+     },
+     {
+      "text": "М-03 · Кухонный остров: разработать габариты, наполнение, столешницу и расположение электрики.",
+      "status": "todo",
+      "note": "",
+      "id": "18-03"
+     },
+     {
+      "text": "М-04 · Панель за телевизором с полкой: разработать размеры, крепления и необходимые коммуникации.",
+      "status": "todo",
+      "note": "",
+      "id": "18-04"
+     },
+     {
+      "text": "М-05 · Тумба ТВ: разработать габариты, секции, наполнение и доступ к коммуникациям.",
+      "status": "todo",
+      "note": "",
+      "id": "18-05"
+     },
+     {
+      "text": "М-06 · Тумба под раковину в ванной: разработать размеры и увязать с сантехникой.",
+      "status": "todo",
+      "note": "",
+      "id": "18-06"
+     },
+     {
+      "text": "М-07 · Зеркало над раковиной: разработать размеры, крепление и электрику при наличии подсветки.",
+      "status": "todo",
+      "note": "",
+      "id": "18-07"
+     },
+     {
+      "text": "М-08 · Обшивка и мебель в зоне инсталляции: разработать габариты, фасады и сервисный доступ.",
+      "status": "todo",
+      "note": "",
+      "id": "18-08"
+     },
+     {
+      "text": "М-09 · Шкаф в спальне: разработать габариты, фасады и внутреннее наполнение.",
+      "status": "todo",
+      "note": "",
+      "id": "18-09"
+     },
+     {
+      "text": "М-10 · Шкаф в детской: разработать габариты, фасады и внутреннее наполнение.",
+      "status": "todo",
+      "note": "",
+      "id": "18-10"
+     },
+     {
+      "text": "Уточнить, нужен ли отдельный лист шкафа для стиральной и сушильной машин в ванной.",
+      "status": "wait",
+      "note": "В перечислении заказных позиций есть неясный фрагмент перед тумбой под раковину.",
+      "id": "18-11"
+     },
+     {
+      "text": "Для всех позиций согласовать материалы, цвета, петли, ручки, фурнитуру и необходимое наполнение.",
+      "status": "todo",
+      "note": "",
+      "id": "18-12"
+     },
+     {
+      "text": "После разработки мебели вернуть окончательные габариты, марки и ссылки на план мебели и развертки.",
+      "status": "todo",
+      "note": "",
+      "id": "18-13"
+     }
+    ]
+   },
+   {
+    "id": "oq6",
+    "title": "Открытые вопросы · Этап 6",
+    "tasks": [
+     {
+      "text": "Уточнить материалы и цвета корпусной мебели, петли, ручки и наполнение.",
+      "status": "wait",
+      "note": "",
+      "id": "19-03"
+     }
+    ],
+    "is_open_q": true
+   }
+  ]
+ },
+ {
+  "id": "general",
+  "title": "Общие вопросы проекта",
+  "sections": [
+   {
+    "id": "general",
+    "title": "Общие вопросы",
+    "tasks": [
+     {
+      "text": "Сверить планы и развертки: размеры, высоты, электрику, сантехнику, мебель, светильники и отделку.",
+      "status": "todo",
+      "note": "",
+      "id": "20-01"
+     },
+     {
+      "text": "Проверить актуальность всех моделей оборудования и спецификаций.",
+      "status": "todo",
+      "note": "",
+      "id": "20-02"
+     },
+     {
+      "text": "Пересчитать площади материалов, количество светильников и длины плинтусов.",
+      "status": "todo",
+      "note": "",
+      "id": "20-03"
+     },
+     {
+      "text": "Проверить единство марок материалов и мебели во всем комплекте.",
+      "status": "todo",
+      "note": "",
+      "id": "20-04"
+     },
+     {
+      "text": "Проверить номера листов, разверток, выноски, ссылки и ведомость чертежей.",
+      "status": "todo",
+      "note": "",
+      "id": "20-05"
+     },
+     {
+      "text": "Привести комплект к единому фирменному оформлению и подготовить выпуск.",
+      "status": "todo",
+      "note": "",
+      "id": "20-06"
+     }
+    ]
+   }
+  ],
+  "is_general": true
+ }
+];
+
+let state = {};
+let dirty = false;
+let currentFilter = 'all';
+let currentSearch = '';
+
+// Load state from Gist
+async function loadState() {
+  try {
+    const url = `https://gist.githubusercontent.com/art19323/${GIST_ID}/raw/${GIST_FILE}?t=${Date.now()}`;
+    const r = await fetch(url);
+    if (r.ok) {
+      const d = await r.json();
+      state = d.tasks || {};
+    }
+  } catch(e) { console.log('load error', e); }
+  render();
+}
+
+async function saveToGist() {
+  const btn = document.getElementById('save-btn');
+  const status = document.getElementById('save-status');
+  btn.textContent = '⏳ Сохраняю…';
+  btn.disabled = true;
+  try {
+    const token = await getToken();
+    if (!token) { showStatus('Токен не найден'); return; }
+    const payload = { files: { [GIST_FILE]: { content: JSON.stringify({ project:'1326_JUU', tasks: state }, null, 2) } } };
+    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify(payload)
+    });
+    if (r.ok) { dirty = false; btn.style.display = 'none'; showStatus('✓ Сохранено'); }
+    else showStatus('Ошибка сохранения: ' + r.status);
+  } catch(e) { showStatus('Ошибка: ' + e.message); }
+  btn.textContent = '💾 Сохранить';
+  btn.disabled = false;
+}
+
+async function getToken() {
+  // Token stored in localStorage after first entry
+  let t = localStorage.getItem('gh_token');
+  if (t) return t;
+  t = prompt('GitHub token (gist scope):');
+  if (t) localStorage.setItem('gh_token', t);
+  return t;
+}
+
+function showStatus(msg) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 2500);
+}
+
+function setStatus(taskId, status) {
+  state[taskId] = status;
+  dirty = true;
+  document.getElementById('save-btn').style.display = 'block';
+  updateTaskEl(taskId);
+  updateStats();
+}
+
+function updateTaskEl(taskId) {
+  const el = document.getElementById('t_' + taskId);
+  if (!el) return;
+  const s = state[taskId] || 'todo';
+  el.className = 'task ' + (s === 'done' ? 'done' : '');
+  const badge = el.querySelector('.task-badge');
+  if (badge) {
+    badge.className = 'task-badge badge-' + s;
+    badge.textContent = s === 'done' ? '✓ Готово' : s === 'blocked' ? '⏳ Ожидает' : '○ Не начато';
+  }
+  const cb = el.querySelector('input[type=checkbox]');
+  if (cb) cb.checked = s === 'done';
+  applyFilter(el, taskId);
+}
+
+function applyFilter(el, taskId) {
+  const s = state[taskId] || 'todo';
+  const text = el.querySelector('.task-text').textContent.toLowerCase();
+  const matchFilter = currentFilter === 'all' || currentFilter === s;
+  const matchSearch = !currentSearch || text.includes(currentSearch);
+  el.classList.toggle('hidden', !matchFilter || !matchSearch);
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  reapplyFilters();
+}
+
+function doSearch(q) {
+  currentSearch = q.toLowerCase().trim();
+  reapplyFilters();
+}
+
+function reapplyFilters() {
+  document.querySelectorAll('.task').forEach(el => {
+    const taskId = el.id.replace('t_', '');
+    applyFilter(el, taskId);
+  });
+}
+
+function updateStats() {
+  let total = 0, done = 0, blocked = 0, todo = 0;
+  document.querySelectorAll('.task').forEach(el => {
+    const id = el.id.replace('t_', '');
+    const s = state[id] || 'todo';
+    total++; if (s==='done') done++; else if (s==='blocked') blocked++; else todo++;
+  });
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-blocked').textContent = blocked;
+  document.getElementById('s-todo').textContent = todo;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('main-bar').style.width = pct + '%';
+  // update stage mini-bars
+  document.querySelectorAll('.stage').forEach(stEl => {
+    const tasks = stEl.querySelectorAll('.task');
+    const d = [...tasks].filter(t => (state[t.id.replace('t_','')] || 'todo') === 'done').length;
+    const fill = stEl.querySelector('.mini-fill');
+    const pctEl = stEl.querySelector('.stage-pct');
+    if (fill) fill.style.width = tasks.length ? (d/tasks.length*100)+'%' : '0%';
+    if (pctEl) pctEl.textContent = tasks.length ? `${d}/${tasks.length}` : '';
+  });
+}
+
+function render() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  STAGES.forEach((stage, si) => {
+    const isGeneral = stage.is_general;
+    const stEl = document.createElement('div');
+    stEl.className = 'stage' + (isGeneral ? ' general' : '') + (si === 0 ? ' open' : '');
+    stEl.id = 'stage_' + stage.id;
+
+    const header = document.createElement('div');
+    header.className = 'stage-header';
+    header.innerHTML = `
+      <span class="stage-num">${isGeneral ? '★' : 'Этап ' + stage.id}</span>
+      <span class="stage-name">${isGeneral ? 'Общие вопросы проекта' : stage.title.replace(/^Этап \d+ · /, '')}</span>
+      <span class="stage-meta">
+        <span class="stage-pct"></span>
+        <span class="mini-bar"><span class="mini-fill" style="width:0%"></span></span>
+      </span>
+      <span class="chevron">▾</span>`;
+    header.onclick = () => { stEl.classList.toggle('open'); };
+
+    const body = document.createElement('div');
+    body.className = 'stage-body';
+
+    stage.sections.forEach(sec => {
+      const isOQ = sec.is_open_q;
+      const secEl = document.createElement('div');
+      secEl.className = 'section' + (isOQ ? ' open-q' : '');
+
+      const sh = document.createElement('div');
+      sh.className = 'section-header';
+      sh.innerHTML = `<span class="section-label">${sec.title}</span><span class="section-count">${sec.tasks.length}</span><span class="sec-chevron">▾</span>`;
+      sh.onclick = () => secEl.classList.toggle('open');
+
+      const tasksEl = document.createElement('div');
+      tasksEl.className = 'section-tasks';
+
+      sec.tasks.forEach(t => {
+        const tid = t.id;
+        const initStatus = state[tid] || t.status || 'todo';
+        if (!state[tid]) state[tid] = initStatus;
+
+        const tEl = document.createElement('div');
+        tEl.className = 'task' + (initStatus === 'done' ? ' done' : '');
+        tEl.id = 't_' + tid;
+
+        const badge = initStatus === 'done' ? '<span class="task-badge badge-done">✓ Готово</span>'
+          : initStatus === 'blocked' ? '<span class="task-badge badge-blocked">⏳ Ожидает</span>'
+          : '<span class="task-badge badge-todo">○ Не начато</span>';
+
+        const note = t.note ? `<div class="task-note">${t.note}</div>` : '';
+
+        tEl.innerHTML = `
+          <div class="task-check"><input type="checkbox" ${initStatus==='done'?'checked':''} onchange="toggleDone('${tid}',this.checked)"></div>
+          <div class="task-body">
+            <div class="task-text">${t.text}</div>
+            ${badge}${note}
+          </div>`;
+        tasksEl.appendChild(tEl);
+      });
+
+      secEl.appendChild(sh);
+      secEl.appendChild(tasksEl);
+      body.appendChild(secEl);
+    });
+
+    stEl.appendChild(header);
+    stEl.appendChild(body);
+    main.appendChild(stEl);
+  });
+  updateStats();
+}
+
+function toggleDone(tid, checked) {
+  setStatus(tid, checked ? 'done' : 'todo');
+}
+
+loadState();
+</script>
+</body>
+</html>
