@@ -1462,7 +1462,7 @@ function render() {
       (customTasks[sec.id] || []).forEach(ct => {
         if (!state[ct.id]) state[ct.id] = {status: 'todo'};
         const s = getStatus(ct.id);
-        const el = makeTaskEl(ct.id, ct.text, s, true, '', sec.id, ct.img);
+        const el = makeTaskEl(ct.id, ct.text, s, true, ct.note || '', sec.id, ct.img);
         el.id = 't_' + ct.id;
         tasksEl.appendChild(el);
       });
