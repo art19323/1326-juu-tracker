@@ -20,7 +20,7 @@ html{color-scheme:light}
 body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:14px;min-height:100vh}
 
 /* ── header ── */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;position:relative;z-index:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 header h1{font-size:17px;font-weight:700}
 header h1 span{color:var(--accent)}
 .stats{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
@@ -30,7 +30,7 @@ header h1 span{color:var(--accent)}
 .progress-fill{height:3px;background:var(--done);border-radius:2px;transition:width .4s}
 
 /* ── filters ── */
-.filters{padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:53px;z-index:99}
+.filters{padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:99;box-shadow:0 2px 10px #00000014}
 .filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:3px 11px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
 .filter-btn.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
 .search{flex:1;min-width:140px;max-width:280px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 10px;border-radius:20px;font-size:12px;outline:none}
@@ -103,6 +103,10 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .task-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;opacity:.35;transition:opacity .15s}
 .task:hover .task-del{opacity:1}
 .task-del:hover{opacity:1!important;color:#dc2626}
+.task-edit{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;opacity:.35;transition:opacity .15s}
+.task:hover .task-edit{opacity:1}
+.task-edit:hover{opacity:1!important;color:var(--accent2)}
+.rename-input{width:100%;font:inherit;color:var(--text);background:var(--surface2);border:1px solid var(--accent2);border-radius:6px;padding:3px 6px;box-sizing:border-box}
 
 /* ── add-task row ── */
 .add-task-row{display:flex;gap:8px;padding:8px 16px 10px 36px;border-top:1px solid var(--border)}
@@ -241,9 +245,16 @@ function openStatusMenu(tid, badgeEl) {
   statusMenuTarget = tid;
   const menu = document.getElementById('status-menu');
   const rect = badgeEl.getBoundingClientRect();
-  menu.style.top = (rect.bottom + 4 + window.scrollY) + 'px';
-  menu.style.left = rect.left + 'px';
   menu.classList.add('show');
+  // меню position:fixed — координаты считаем от вьюпорта; window.scrollY добавлять нельзя,
+  // иначе при прокрутке оно уезжает за нижний край и «статус не выбирается».
+  const mh = menu.offsetHeight, mw = menu.offsetWidth;
+  let top = rect.bottom + 4;
+  if (top + mh > window.innerHeight - 8) top = Math.max(8, rect.top - mh - 4);
+  let left = rect.left;
+  if (left + mw > window.innerWidth - 8) left = Math.max(8, window.innerWidth - mw - 8);
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
   setTimeout(() => document.addEventListener('click', closeMenuOnce), 0);
 }
 function closeMenuOnce(e) {
@@ -312,6 +323,49 @@ function deleteTask(tid, secId) {
   updateSectionCounts();
 }
 
+// ── rename ────────────────────────────────────────────────────────────────────
+function startRename(tid, secId) {
+  const el = document.getElementById('t_' + tid);
+  if (!el) return;
+  const box = el.querySelector('.task-text');
+  if (!box || box.dataset.editing) return;
+  const old = box.textContent;
+  box.dataset.editing = '1';
+  box.textContent = '';
+  const inp = document.createElement('input');
+  inp.className = 'rename-input';
+  inp.value = old;
+  box.appendChild(inp);
+  inp.focus();
+  inp.select();
+  const finish = (save) => {
+    if (!box.dataset.editing) return;
+    delete box.dataset.editing;
+    const val = inp.value.trim();
+    inp.remove();
+    if (save && val && val !== old) applyRename(tid, secId, val);
+    else box.textContent = old;
+  };
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+  });
+  inp.addEventListener('blur', () => finish(true));
+}
+
+function applyRename(tid, secId, text) {
+  let inCustom = false;
+  (customTasks[secId] || []).forEach(t => { if (t.id === tid) { t.text = text; inCustom = true; } });
+  if (!state[tid]) state[tid] = {};
+  if (typeof state[tid] === 'string') state[tid] = {status: state[tid]};
+  if (!inCustom) state[tid].text = text;   // вшитая задача: текст хранится в состоянии
+  const el = document.getElementById('t_' + tid);
+  const box = el && el.querySelector('.task-text');
+  if (box) box.textContent = text;
+  markDirty();
+  reapplyFilters();
+}
+
 // ── render ────────────────────────────────────────────────────────────────────
 function badgeHtml(tid, s) {
   const cls = s === 'done' ? 'badge-done' : s === 'blocked' ? 'badge-blocked' : 'badge-todo';
@@ -320,6 +374,7 @@ function badgeHtml(tid, s) {
 }
 
 function makeTaskEl(tid, text, initStatus, isCustom, note, secId, img) {
+  if (state[tid] && state[tid].text) text = state[tid].text;
   const el = document.createElement('div');
   el.className = 'task' + (initStatus === 'done' ? ' done' : '');
   el.id = 't_' + tid;
@@ -332,6 +387,7 @@ function makeTaskEl(tid, text, initStatus, isCustom, note, secId, img) {
       ${img ? `<a href="${escHtml(img)}" target="_blank" rel="noopener"><img class="task-img" src="${escHtml(img)}" loading="lazy" alt="скриншот"></a>` : ''}
       <div class="task-actions">
         ${badgeHtml(tid, initStatus)}
+        <button class="task-edit" onclick="startRename('${tid}','${secId}')" title="Переименовать">✎</button>
         <button class="task-del" onclick="deleteTask('${tid}','${secId}')" title="Удалить">✕</button>
       </div>
       ${note ? `<div class="task-note">${escHtml(note)}</div>` : ''}
