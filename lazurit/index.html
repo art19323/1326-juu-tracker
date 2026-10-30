@@ -134,6 +134,10 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .project-banner .pb-cap{position:absolute;left:0;right:0;bottom:0;padding:8px 14px;font-size:12px;color:#fff;
   background:linear-gradient(180deg,rgba(30,35,46,0),rgba(30,35,46,.62))}
 @media(max-width:700px){.project-banner{height:180px;margin:10px 12px 0;border-radius:var(--r)}}
+.projects{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.proj{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);text-decoration:none;white-space:nowrap;transition:all .15s}
+.proj:hover{border-color:var(--accent2);color:var(--accent2)}
+.proj.active{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:600}
 </style>
 </head>
 <body>
@@ -141,7 +145,11 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 <header>
   <div style="flex:1;min-width:200px">
     <h1>Лазурит (Катя) · <span>Трекер</span></h1>
-    <div style="font-size:12px;margin-top:4px"><a href="../" style="color:#6d2b5f;text-decoration:none">← 1326_JUU</a></div>
+    <nav class="projects">
+      <a class="proj" href="../">1326_JUU</a>
+      <a class="proj" href="../savitskogo/">Савицкого 27</a>
+      <a class="proj active" href="../lazurit/">Лазурит (Катя)</a>
+    </nav>
     <div class="progress-bar"><div class="progress-fill" id="main-bar"></div></div>
   </div>
   <div class="stats">
