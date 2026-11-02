@@ -135,9 +135,11 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .proj:hover{border-color:var(--accent2);color:var(--accent2)}
 .proj.active{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:600}
 
-.viewnav{margin-top:6px}
-.viewlink{font-size:12px;font-weight:600;color:var(--accent2);text-decoration:none}
-.viewlink:hover{text-decoration:underline}
+.viewnav{margin-top:8px}
+.viewlink{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+  color:var(--accent2);text-decoration:none;background:var(--surface2);border:1px solid var(--border);
+  padding:4px 12px;border-radius:20px;transition:all .15s}
+.viewlink:hover{border-color:var(--accent2);background:#eef0fe}
 </style>
 </head>
 <body>
