@@ -46,6 +46,8 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 .stage-header:hover{background:var(--surface2)}
 .stage-num{background:var(--accent2);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0}
 .stage.general .stage-num{background:#7c3aed}
+.stage.folder .stage-num{background:#0f766e}
+.stage.folder .stage-name{text-transform:none}
 .stage-name{font-weight:600;font-size:14px;flex:1}
 .stage-meta{display:flex;gap:8px;align-items:center}
 .stage-pct{font-size:11px;color:var(--muted)}
@@ -186,7 +188,7 @@ main{padding:16px 20px;max-width:900px;margin:0 auto;display:flex;flex-direction
 const GIST_ID = "13b10ae3f32749c8f780236817df7657";
 const GIST_FILE = "budslavskaya37-state.json";
 const GH_USER = "art19323";
-const STAGES = [{"id": "I", "title": "I · Обмеры ДМ", "sections": [{"id": "s1", "title": "Обмеры и фотофиксация", "tasks": []}]}, {"id": "II", "title": "II · Планировка", "sections": [{"id": "s2", "title": "Планировочные решения", "tasks": []}]}, {"id": "III", "title": "III · Сантехника", "sections": [{"id": "s3", "title": "Сантехника и отопление", "tasks": []}]}, {"id": "IV", "title": "IV · Электрика", "sections": [{"id": "s4", "title": "Электрика и освещение", "tasks": []}]}, {"id": "V", "title": "V · Отделка", "sections": [{"id": "s5", "title": "Отделка и покрытия", "tasks": []}]}, {"id": "general", "title": "Общие вопросы проекта", "is_general": true, "sections": [{"id": "general", "title": "Общие вопросы", "tasks": []}]}];
+const STAGES = [{"id": "P", "title": "Разработка планировочного решения", "is_folder": true, "sections": [{"id": "plan_dev", "title": "Задачи", "tasks": []}]}, {"id": "I", "title": "I · Обмеры ДМ", "sections": [{"id": "s1", "title": "Обмеры и фотофиксация", "tasks": []}]}, {"id": "II", "title": "II · Планировка", "sections": [{"id": "s2", "title": "Планировочные решения", "tasks": []}]}, {"id": "III", "title": "III · Сантехника", "sections": [{"id": "s3", "title": "Сантехника и отопление", "tasks": []}]}, {"id": "IV", "title": "IV · Электрика", "sections": [{"id": "s4", "title": "Электрика и освещение", "tasks": []}]}, {"id": "V", "title": "V · Отделка", "sections": [{"id": "s5", "title": "Отделка и покрытия", "tasks": []}]}, {"id": "general", "title": "Общие вопросы проекта", "is_general": true, "sections": [{"id": "general", "title": "Общие вопросы", "tasks": []}]}];
 
 let state = {};       // taskId -> {status, text?, custom?}
 let customTasks = {}; // sectionId -> [{id,text,status}]
@@ -433,14 +435,14 @@ function render() {
   STAGES.forEach((stage, si) => {
     const isGeneral = !!stage.is_general;
     const stEl = document.createElement('div');
-    stEl.className = 'stage' + (isGeneral?' general':'') + (si===0?' open':'');
+    stEl.className = 'stage' + (isGeneral?' general':'') + (stage.is_folder?' folder':'') + (si===0?' open':'');
 
     const header = document.createElement('div');
     header.className = 'stage-header';
-    const label = isGeneral ? 'Общие вопросы проекта' : stage.title.replace(/^Этап \d+ · /,'');
+    const label = isGeneral ? 'Общие вопросы проекта' : (stage.is_folder ? stage.title : stage.title.replace(/^Этап \d+ · /,''));
     header.innerHTML = `
       <span class="pfill"></span>
-      <span class="stage-num">${isGeneral?'★':'Этап '+stage.id}</span>
+      <span class="stage-num">${isGeneral?'★':(stage.is_folder?'📁':'Этап '+stage.id)}</span>
       <span class="stage-name">${escHtml(label)}</span>
       <span class="stage-meta">
         <span class="stage-pct"></span>
